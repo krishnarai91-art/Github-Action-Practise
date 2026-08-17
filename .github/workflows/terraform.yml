@@ -1,0 +1,58 @@
+name: Terraform CI
+
+on:
+  push:
+
+  pull_request: 
+
+jobs:
+  terraform:
+    name: "Terraform Check"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./env/prepod
+
+
+    steps:
+
+      # 1. Checkout Code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Setup Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.5"
+
+      # 3. Azure CLI Login
+      - name: Azure Login 
+        uses: azure/login@v3
+        with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 4. Verify Azure Login
+      - name: Check Azure Account
+        shell: bash
+        run: |
+          az account show \
+            --query "{Subscription:id, Tenant:tenantId, Name:name}" \
+            -o table
+
+      # 5. Terraform Init
+      - name: Terraform Init
+        run: terraform init
+
+      # 6. Terraform Format Check
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      # 7. Terraform Validate
+      - name: Terraform Validate
+        run: terraform validate
+
+      # 8. Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan
