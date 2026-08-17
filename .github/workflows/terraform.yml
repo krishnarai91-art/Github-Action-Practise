@@ -12,7 +12,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: ./env/prepod
+        working-directory: ./env/preprod
 
 
     steps:
